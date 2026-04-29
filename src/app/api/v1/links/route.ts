@@ -1,4 +1,3 @@
-import { z } from 'zod'
 import {
   buildShortUrl,
   enforceCreateLimit,
@@ -7,6 +6,7 @@ import {
 } from '@/lib/api-helpers'
 import { createShortLink } from '@/lib/link-service'
 import { rateLimitHeaders } from '@/lib/rate-limit'
+import { z } from 'zod'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

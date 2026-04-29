@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
 import { generateSlug, isReserved, isValidSlug, SLUG_LENGTH } from '@/lib/slug'
+import { describe, expect, it } from 'vitest'
 
 describe('slug', () => {
   it('generates 6-character URL-safe slugs', () => {

@@ -1,10 +1,10 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { z } from 'zod'
 import { anonymousIdentity, apiKeyIdentity, type Identity } from '@/lib/identity'
 import { createShortLink, getShortLink } from '@/lib/link-service'
-import { detectPlatform } from '@/lib/platforms'
+import { detectPlatform, platformPathSegment } from '@/lib/platforms'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { cleanUrl } from '@/lib/url-cleaner'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { z } from 'zod'
 
 export type McpContext = {
   identity: Identity
