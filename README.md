@@ -1,201 +1,496 @@
-# Link Shortener
+# Linkshort
 
-A minimal link shortener built with **Next.js 12**, **TypeScript**, **Prisma**, and a **MySQL-compatible database** such as PlanetScale.
+Linkshort is a privacy-conscious URL shortener built with Next.js and Appwrite.
+It creates six-character short links, strips common tracking parameters before
+storing redirects, detects platform metadata, exposes REST endpoints, and ships
+an MCP server so AI agents can clean or shorten links through the same backend.
 
-This repository currently provides the backend pieces for short-link resolution:
+## Core Features
 
-- a Prisma model for storing short links
-- an API route for looking up a slug
-- middleware that attempts to redirect slug paths to their destination URL
+- Shorten links at `/{platform}/{slug}` with six-character slugs, such as
+  `/google_drive/aB3xQ9`.
+- Clean URLs by removing tracking parameters such as `utm_*`, `fbclid`,
+  `gclid`, `msclkid`, `mc_cid`, `igshid`, `ref`, `ref_src`, and similar tags.
+- Preserve destination-critical parameters such as YouTube `v` and `list`.
+- Detect common platforms including YouTube, LinkedIn, Instagram, X/Twitter,
+  Google Drive/Docs/Sheets/Forms, GitHub, Notion, Figma, Reddit, Amazon,
+  WhatsApp, Telegram, Discord, Spotify, Pinterest, and generic web links.
+- Rate-limit link creation to 2 requests per second per IP or API-key identity.
+- Store data in Appwrite Databases and deploy on Appwrite Sites.
+- Run a scheduled Appwrite Function to clean expired rate-limit rows.
+- Provide MCP tools for AI agents: `create_short_link`, `clean_url`, and
+  `get_link_info`.
 
-The homepage is still a placeholder, so think of this repo as a solid foundation rather than a finished product.
+## Stack
 
-## Overview
+- Next.js App Router
+- React
+- TypeScript
+- Appwrite Databases, Sites, and Functions
+- `node-appwrite`
+- Zod
+- Nano ID
+- Model Context Protocol SDK
+- Vitest
 
-When a user visits a short path such as `/docs`, the application extracts the slug, looks it up in the database, and returns the matching destination URL. If a match is found, the request is redirected to the full URL.
-
-### Current capabilities
-
-- Resolve a slug from the database using Prisma
-- Fetch short-link metadata from `GET /api/[slug]`
-- Attempt automatic redirect handling through `src/_middleware.ts`
-- Run with strict TypeScript settings
-
-### Current limitations
-
-- No UI yet for creating or managing short links
-- No authentication or admin dashboard
-- `src/pages/index.tsx` is still an empty placeholder page
-- The sample `src/pages/api/hello.ts` endpoint is still present from the starter template
-
-## Tech stack
-
-- **Framework:** Next.js 12
-- **Language:** TypeScript
-- **UI runtime:** React 18
-- **Database ORM:** Prisma 4
-- **Database:** MySQL / PlanetScale
-- **Tooling:** ESLint, Prettier, Husky, lint-staged
-
-## Project structure
+## Project Structure
 
 ```text
-.
-├── prisma/
-│   └── schema.prisma         # Prisma schema and database model
-├── public/                   # Static assets
-├── src/
-│   ├── db/
-│   │   └── client.ts         # Prisma client singleton
-│   ├── pages/
-│   │   ├── api/
-│   │   │   ├── [slug].ts     # Lookup endpoint for a short link
-│   │   │   └── hello.ts      # Starter example endpoint
-│   │   ├── _app.tsx          # Global app wrapper
-│   │   └── index.tsx         # Placeholder homepage
-│   └── _middleware.ts        # Redirect middleware
-├── styles/                   # Global and module CSS
-├── .env.example              # Example environment variables
-├── CONTRIBUTING.md           # Contribution guide
-└── README.md                 # Project documentation
+src/app/                    Next.js App Router pages and API routes
+src/app/[platform]/[slug]/  Public platform-prefixed short-link redirect route
+src/app/[platform]/route.ts Legacy slug-only redirect route
+src/app/api/v1/links/       REST endpoint for creating short links
+src/app/api/v1/clean/       REST endpoint for URL cleaning
+src/app/api/mcp/            Hosted MCP Streamable HTTP route
+src/components/             Client UI components
+src/lib/                    URL cleaning, Appwrite, rate limit, slug services
+src/mcp/                    Shared MCP server and local stdio transport
+functions/cleanup-rate-limits/
+                             Scheduled Appwrite cleanup function
+scripts/setup-appwrite.ts   Idempotent Appwrite schema setup script
+tests/                      Unit tests
 ```
 
-## Database model
+## Environment Variables
 
-The application stores short links in the `ShortLink` model:
+Create `.env` from `.env.example`:
 
-| Field       | Type       | Notes                             |
-| ----------- | ---------- | --------------------------------- |
-| `id`        | `Int`      | Primary key, auto-incremented     |
-| `slug`      | `String`   | Unique short code used in the URL |
-| `url`       | `String`   | Destination URL                   |
-| `createdAt` | `DateTime` | Automatically set on create       |
-| `updatedAt` | `DateTime` | Automatically updated on change   |
+```sh
+cp .env.example .env
+```
 
-## API reference
+Required server-side variables:
 
-### `GET /api/[slug]`
+```env
+APPWRITE_ENDPOINT=https://sgp.cloud.appwrite.io/v1
+APPWRITE_PROJECT_ID=shortlinks
+APPWRITE_API_KEY=
+APPWRITE_DATABASE_ID=linkshort
+APPWRITE_SHORT_LINKS_TABLE_ID=short_links
+APPWRITE_API_KEYS_TABLE_ID=api_keys
+APPWRITE_RATE_LIMITS_TABLE_ID=rate_limits
+```
 
-Returns the database record for the supplied slug.
+Public/runtime variables:
 
-#### Success response
+```env
+NEXT_PUBLIC_SITE_URL=https://shortlinks.bhaumicsingh.tech
+```
+
+Optional local MCP variable:
+
+```env
+LINKSHORT_API_KEY=
+```
+
+`APPWRITE_API_KEY` must be treated as a server secret. Do not expose it in
+client code or public repositories.
+
+`LINKSHORT_API_KEY` is a separate Linkshort client key used as an optional
+identity for MCP/REST requests and rate limiting.
+
+## Appwrite Setup
+
+The project expects one Appwrite database and three collections:
+
+- `short_links`
+- `api_keys`
+- `rate_limits`
+
+Appwrite already provides `$id`, `$createdAt`, and `$updatedAt` on every
+document. The schema intentionally does not create duplicate custom timestamp
+attributes.
+
+Provision or update the schema:
+
+```sh
+bun run appwrite:setup
+```
+
+## Local Development
+
+Install dependencies:
+
+```sh
+bun install
+```
+
+Start the development server:
+
+```sh
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+Useful checks:
+
+```sh
+bun run typecheck
+bun run lint
+bun run test
+bun run build
+```
+
+## Website Usage
+
+The homepage provides a paste-first form. Enter a long URL and Linkshort will:
+
+1. Validate that the URL is `http` or `https`.
+2. Remove known tracking parameters.
+3. Detect the platform from the hostname.
+4. Store the cleaned destination in Appwrite.
+5. Return a short URL in the form `https://your-domain/{platform}/{slug}`.
+
+Redirects use `307 Temporary Redirect` so destinations can remain flexible later.
+Click counts are stored as aggregate integers on the short-link document.
+
+## REST API
+
+Base URL:
+
+```text
+https://your-domain
+```
+
+For local development:
+
+```text
+http://localhost:3000
+```
+
+### Create Short Link
+
+```http
+POST /api/v1/links
+Content-Type: application/json
+Authorization: Bearer <optional-linkshort-api-key>
+```
+
+Request:
 
 ```json
 {
-  "id": 1,
-  "slug": "docs",
-  "url": "https://example.com/docs",
-  "createdAt": "2026-04-29T00:00:00.000Z",
-  "updatedAt": "2026-04-29T00:00:00.000Z"
+  "url": "https://example.com/path?utm_source=newsletter&keep=1"
 }
 ```
 
-#### Error responses
+Response `201`:
 
-- `404` — slug not found
-- `500` — invalid or missing slug parameter
-
-## How requests flow
-
-1. A request comes in for a path like `/my-link`.
-2. `src/_middleware.ts` extracts the slug from the request path.
-3. The middleware queries the slug lookup API.
-4. If the slug exists, the request is redirected to the stored `url`.
-5. If the slug does not exist, the request continues without a redirect.
-
-## Getting started
-
-### Prerequisites
-
-- Node.js 18 LTS recommended
-- npm
-- A MySQL-compatible database connection string
-
-### 1. Install dependencies
-
-```bash
-npm install
+```json
+{
+  "slug": "aB3xQ9",
+  "shortUrl": "https://your-domain/aB3xQ9",
+  "originalUrl": "https://example.com/path?utm_source=newsletter&keep=1",
+  "cleanedUrl": "https://example.com/path?keep=1",
+  "platform": "web",
+  "platformHost": "example.com",
+  "createdAt": "2026-04-29T11:48:14.323+00:00"
+}
 ```
 
-### 2. Configure environment variables
+Rate-limit headers are included:
 
-This repository now includes both `.env` and `.env.example` with a placeholder `DATABASE_URL`.
-
-Update the value in `.env` with your own database connection string:
-
-```env
-DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE"
+```http
+X-RateLimit-Limit: 2
+X-RateLimit-Remaining: 1
+X-RateLimit-Reset: 1777463294
 ```
 
-### 3. Generate the Prisma client
+### Clean URL Without Shortening
 
-```bash
-npx prisma generate
+```http
+POST /api/v1/clean
+Content-Type: application/json
 ```
 
-### 4. Push the schema to your database
+Request:
 
-```bash
-npx prisma db push
+```json
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=share"
+}
 ```
 
-### 5. Start the development server
+Response `200`:
 
-```bash
-npm run dev
+```json
+{
+  "originalUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&utm_source=share",
+  "cleanedUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "host": "www.youtube.com",
+  "platform": "youtube"
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+### Get Link Metadata
 
-## Available scripts
-
-| Script           | Description                          |
-| ---------------- | ------------------------------------ |
-| `npm run dev`    | Start the Next.js development server |
-| `npm run build`  | Build the app for production         |
-| `npm run start`  | Start the production server          |
-| `npm run lint`   | Run ESLint                           |
-| `npm run pretty` | Format the repository with Prettier  |
-
-## Development notes
-
-- Prisma is configured in `src/db/client.ts`.
-- The database provider is `mysql` in `prisma/schema.prisma`.
-- `reactStrictMode` is enabled in `next.config.js`.
-- TypeScript runs in strict mode.
-
-## Troubleshooting
-
-### Prisma client errors
-
-If Prisma types or imports fail, regenerate the client:
-
-```bash
-npx prisma generate
+```http
+GET /api/v1/links/{slug}
 ```
 
-### Database connection issues
+Response `200`:
 
-Make sure `DATABASE_URL` is set correctly in `.env` and that your database is reachable from your local machine.
+```json
+{
+  "slug": "aB3xQ9",
+  "shortUrl": "https://your-domain/web/aB3xQ9",
+  "cleanedUrl": "https://example.com/path?keep=1",
+  "originalUrl": "https://example.com/path?utm_source=newsletter&keep=1",
+  "platform": "web",
+  "platformHost": "example.com",
+  "clickCount": 0,
+  "createdAt": "2026-04-29T11:48:14.323+00:00"
+}
+```
 
-### Slug does not redirect
+### Redirect
 
-Check the following:
+```http
+GET /{platform}/{slug}
+```
 
-- the slug exists in the `ShortLink` table
-- the `url` column contains a valid destination URL
-- the API route works directly at `/api/<slug>`
+Legacy `GET /{slug}` links continue to redirect for backward compatibility.
 
-## Contributing
+Returns:
 
-Contributions are welcome. For contributor workflow, setup expectations, and pull request guidance, see [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+```http
+307 Temporary Redirect
+Location: <cleanedUrl>
+```
 
-## Future improvements
+### Health Check
 
-Here are a few sensible next steps for the project:
+```http
+GET /api/health
+```
 
-- add a form or dashboard to create short links
-- add validation for URLs and slugs
-- add tests for middleware and API routes
-- add analytics, rate limiting, and expiration support
-- add custom 404 and error pages
+Response `200`:
+
+```json
+{
+  "status": "ok",
+  "runtime": "unknown",
+  "deployment": null,
+  "time": "2026-04-29T11:47:00.819Z"
+}
+```
+
+### Error Responses
+
+Common errors:
+
+- `400` invalid JSON, missing URL, unsupported protocol, or invalid URL.
+- `404` unknown, malformed, reserved, inactive, or expired slug.
+- `429` creation rate limit exceeded.
+- `500` unexpected server/Appwrite failure.
+
+Example:
+
+```json
+{
+  "error": "Rate limit exceeded. Try again in a moment."
+}
+```
+
+## Rate Limiting
+
+Link creation is limited to 2 requests per second per identity.
+
+Identity resolution:
+
+1. `Authorization: Bearer <key>` or `x-api-key: <key>` creates an API-key
+   identity.
+2. Requests without an API key fall back to an anonymous IP-based identity.
+
+The limiter uses Appwrite `rate_limits` documents with deterministic IDs per
+scope, identity hash, and second. Counts are incremented atomically with
+Appwrite document attribute increments.
+
+## MCP Usage
+
+Linkshort can be used by AI agents through MCP.
+
+### Hosted Streamable HTTP
+
+The hosted route is:
+
+```text
+https://your-domain/api/mcp
+```
+
+Example MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "linkshort": {
+      "type": "http",
+      "url": "https://your-domain/api/mcp",
+      "headers": {
+        "x-api-key": "optional-linkshort-api-key"
+      }
+    }
+  }
+}
+```
+
+### Local Stdio
+
+Run the local stdio transport from the repository:
+
+```sh
+LINKSHORT_API_KEY=optional-linkshort-api-key bun run mcp:stdio
+```
+
+For PowerShell:
+
+```powershell
+$env:LINKSHORT_API_KEY = "optional-linkshort-api-key"
+bun run mcp:stdio
+```
+
+To create a Linkshort API key for this purpose:
+
+1. Generate a long random secret, for example with `openssl rand -base64 32`,
+   `node -e "console.log(crypto.randomBytes(32).toString('base64url'))"`, or a
+   password manager.
+2. Save the raw value only in your MCP client configuration or local shell
+   environment as `LINKSHORT_API_KEY`.
+3. Use the same raw value in hosted MCP/REST clients as `x-api-key` or
+   `Authorization: Bearer <key>`.
+
+Until API-key validation against the `api_keys` table is implemented, any
+non-empty random value acts as a stable API-key identity for rate limiting. When
+validation is added, store only the key hash/prefix in Appwrite and keep the raw
+key secret.
+
+### MCP Tools
+
+#### `create_short_link`
+
+Creates a short link from a URL and stores the cleaned destination.
+
+Input:
+
+```json
+{
+  "url": "https://example.com/?utm_source=agent&keep=1"
+}
+```
+
+Output text contains JSON:
+
+```json
+{
+  "slug": "aB3xQ9",
+  "shortUrl": "https://your-domain/web/aB3xQ9",
+  "cleanedUrl": "https://example.com/?keep=1",
+  "platform": "web"
+}
+```
+
+This tool uses the same Appwrite-backed creation rate limit as the website and
+REST API.
+
+#### `clean_url`
+
+Strips tracking parameters without creating a short link.
+
+Input:
+
+```json
+{
+  "url": "https://example.com/?utm_campaign=spring&keep=1"
+}
+```
+
+Output text contains JSON:
+
+```json
+{
+  "originalUrl": "https://example.com/?utm_campaign=spring&keep=1",
+  "cleanedUrl": "https://example.com/?keep=1",
+  "host": "example.com",
+  "platform": "web"
+}
+```
+
+#### `get_link_info`
+
+Looks up metadata for an existing short link.
+
+Input:
+
+```json
+{
+  "slug": "aB3xQ9"
+}
+```
+
+Output text contains JSON:
+
+```json
+{
+  "slug": "aB3xQ9",
+  "cleanedUrl": "https://example.com/?keep=1",
+  "originalUrl": "https://example.com/?utm_campaign=spring&keep=1",
+  "platform": "web",
+  "clickCount": 0,
+  "createdAt": "2026-04-29T11:48:14.323+00:00"
+}
+```
+
+## Implementation Notes
+
+- `src/lib/url-cleaner.ts` owns validation and tracking-parameter removal.
+- `src/lib/platforms.ts` owns platform detection.
+- `src/lib/slug.ts` owns six-character slug generation and reserved slug checks.
+- `src/lib/link-service.ts` owns link creation, lookup, and click counting.
+- `src/lib/rate-limit.ts` owns the Appwrite-backed fixed-window limiter.
+- `src/mcp/server.ts` registers MCP tools and reuses the same service layer.
+- `src/app/api/mcp/route.ts` exposes the hosted MCP Streamable HTTP transport.
+- `functions/cleanup-rate-limits/src/main.ts` deletes expired rate-limit rows.
+
+The public short URL format is `/{platform}/{slug}`. Platform names are stored
+as metadata and used directly in redirect paths, for example
+`/google_drive/aB3xQ9`. Legacy `/{slug}` redirects remain available for links
+created before the platform-prefixed format.
+
+## Deployment
+
+The intended production target is Appwrite:
+
+- Appwrite Sites for the Next.js site, API routes, redirect route, and hosted MCP
+  route.
+- Appwrite Databases for short links, API keys, and rate-limit counters.
+- Appwrite Functions for scheduled cleanup jobs.
+
+Build settings:
+
+```text
+Install command: bun install
+Build command: bun run build
+Output directory: .next
+Framework: Next.js
+```
+
+Before production launch, set `APPWRITE_ENDPOINT` to
+`https://cloud.appwrite.io/v1` and `NEXT_PUBLIC_SITE_URL` to the real
+custom domain (`https://shortlinks.bhaumicsingh.tech`) so generated short links
+use the correct origin.
+
+## Current Limitations
+
+- API-key identities are parsed from request headers, but full API-key
+  validation against the `api_keys` table should be added before offering public
+  API keys.
+- The rate limiter uses Appwrite documents instead of Redis. It fits the
+  Appwrite-only goal, but production concurrency tests are still recommended.
+- The MCP HTTP route is implemented through the Next.js App Router. A standalone
+  Appwrite Function fallback can be added if a client needs longer-lived or
+  sessionful transport behavior.
+
+## License
+
+Private project.
