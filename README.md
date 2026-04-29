@@ -7,7 +7,8 @@ an MCP server so AI agents can clean or shorten links through the same backend.
 
 ## Core Features
 
-- Shorten links at `/{slug}` with six-character slugs.
+- Shorten links at `/{platform}/{slug}` with six-character slugs, such as
+  `/google_drive/aB3xQ9`.
 - Clean URLs by removing tracking parameters such as `utm_*`, `fbclid`,
   `gclid`, `msclkid`, `mc_cid`, `igshid`, `ref`, `ref_src`, and similar tags.
 - Preserve destination-critical parameters such as YouTube `v` and `list`.
@@ -36,7 +37,8 @@ an MCP server so AI agents can clean or shorten links through the same backend.
 
 ```text
 src/app/                    Next.js App Router pages and API routes
-src/app/[slug]/route.ts     Public short-link redirect route
+src/app/[platform]/[slug]/  Public platform-prefixed short-link redirect route
+src/app/[platform]/route.ts Legacy slug-only redirect route
 src/app/api/v1/links/       REST endpoint for creating short links
 src/app/api/v1/clean/       REST endpoint for URL cleaning
 src/app/api/mcp/            Hosted MCP Streamable HTTP route
@@ -72,7 +74,7 @@ APPWRITE_RATE_LIMITS_TABLE_ID=rate_limits
 Public/runtime variables:
 
 ```env
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SITE_URL=https://shortlinks.bhaumicsingh.tech
 ```
 
 Optional local MCP variable:
@@ -83,6 +85,9 @@ LINKSHORT_API_KEY=
 
 `APPWRITE_API_KEY` must be treated as a server secret. Do not expose it in
 client code or public repositories.
+
+`LINKSHORT_API_KEY` is a separate Linkshort client key used as an optional
+identity for MCP/REST requests and rate limiting.
 
 ## Appwrite Setup
 
@@ -135,7 +140,7 @@ The homepage provides a paste-first form. Enter a long URL and Linkshort will:
 2. Remove known tracking parameters.
 3. Detect the platform from the hostname.
 4. Store the cleaned destination in Appwrite.
-5. Return a short URL in the form `https://your-domain/{slug}`.
+5. Return a short URL in the form `https://your-domain/{platform}/{slug}`.
 
 Redirects use `307 Temporary Redirect` so destinations can remain flexible later.
 Click counts are stored as aggregate integers on the short-link document.
@@ -159,7 +164,7 @@ http://localhost:3000
 ```http
 POST /api/v1/links
 Content-Type: application/json
-Authorization: Bearer <optional-api-key>
+Authorization: Bearer <optional-linkshort-api-key>
 ```
 
 Request:
@@ -229,7 +234,7 @@ Response `200`:
 ```json
 {
   "slug": "aB3xQ9",
-  "shortUrl": "https://your-domain/aB3xQ9",
+  "shortUrl": "https://your-domain/web/aB3xQ9",
   "cleanedUrl": "https://example.com/path?keep=1",
   "originalUrl": "https://example.com/path?utm_source=newsletter&keep=1",
   "platform": "web",
@@ -242,8 +247,10 @@ Response `200`:
 ### Redirect
 
 ```http
-GET /{slug}
+GET /{platform}/{slug}
 ```
+
+Legacy `GET /{slug}` links continue to redirect for backward compatibility.
 
 Returns:
 
@@ -321,7 +328,7 @@ Example MCP client configuration:
       "type": "http",
       "url": "https://your-domain/api/mcp",
       "headers": {
-        "x-api-key": "optional-api-key"
+        "x-api-key": "optional-linkshort-api-key"
       }
     }
   }
@@ -333,15 +340,30 @@ Example MCP client configuration:
 Run the local stdio transport from the repository:
 
 ```sh
-LINKSHORT_API_KEY=optional-api-key bun run mcp:stdio
+LINKSHORT_API_KEY=optional-linkshort-api-key bun run mcp:stdio
 ```
 
 For PowerShell:
 
 ```powershell
-$env:LINKSHORT_API_KEY = "optional-api-key"
+$env:LINKSHORT_API_KEY = "optional-linkshort-api-key"
 bun run mcp:stdio
 ```
+
+To create a Linkshort API key for this purpose:
+
+1. Generate a long random secret, for example with `openssl rand -base64 32`,
+   `node -e "console.log(crypto.randomBytes(32).toString('base64url'))"`, or a
+   password manager.
+2. Save the raw value only in your MCP client configuration or local shell
+   environment as `LINKSHORT_API_KEY`.
+3. Use the same raw value in hosted MCP/REST clients as `x-api-key` or
+   `Authorization: Bearer <key>`.
+
+Until API-key validation against the `api_keys` table is implemented, any
+non-empty random value acts as a stable API-key identity for rate limiting. When
+validation is added, store only the key hash/prefix in Appwrite and keep the raw
+key secret.
 
 ### MCP Tools
 
@@ -362,7 +384,7 @@ Output text contains JSON:
 ```json
 {
   "slug": "aB3xQ9",
-  "shortUrl": "https://your-domain/aB3xQ9",
+  "shortUrl": "https://your-domain/web/aB3xQ9",
   "cleanedUrl": "https://example.com/?keep=1",
   "platform": "web"
 }
@@ -430,8 +452,10 @@ Output text contains JSON:
 - `src/app/api/mcp/route.ts` exposes the hosted MCP Streamable HTTP transport.
 - `functions/cleanup-rate-limits/src/main.ts` deletes expired rate-limit rows.
 
-The public short URL format intentionally stays as `/{slug}`. Platform names are
-stored as metadata and are not embedded in redirect paths.
+The public short URL format is `/{platform}/{slug}`. Platform names are stored
+as metadata and used directly in redirect paths, for example
+`/google_drive/aB3xQ9`. Legacy `/{slug}` redirects remain available for links
+created before the platform-prefixed format.
 
 ## Deployment
 
@@ -451,8 +475,10 @@ Output directory: .next
 Framework: Next.js
 ```
 
-Before production launch, set `NEXT_PUBLIC_SITE_URL` to the real Appwrite/custom
-domain so generated short links use the correct origin.
+Before production launch, set `APPWRITE_ENDPOINT` to
+`https://cloud.appwrite.io/v1` and `NEXT_PUBLIC_SITE_URL` to the real
+custom domain (`https://shortlinks.bhaumicsingh.tech`) so generated short links
+use the correct origin.
 
 ## Current Limitations
 

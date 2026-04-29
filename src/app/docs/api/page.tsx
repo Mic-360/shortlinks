@@ -34,22 +34,29 @@ export default function ApiDocsPage() {
 
           <h2>POST /api/v1/links</h2>
           <p>Create a short link.</p>
-          <pre>{`curl -X POST https://your-site/api/v1/links \\
+          <pre>{`curl -X POST https://shortlinks.bhaumicsingh.tech/api/v1/links \
   -H 'Content-Type: application/json' \\
-  -H 'Authorization: Bearer <optional-api-key>' \\
-  -d '{"url":"https://example.com/?utm_source=mailchimp"}'`}</pre>
+          -H 'Authorization: Bearer <optional-linkshort-api-key>' \
+          -d '{"url":"https://drive.google.com/file/d/example/view?usp=drive_link"}'`}</pre>
           <pre>{`{
   "slug": "aB3xQ9",
-  "shortUrl": "https://your-site/aB3xQ9",
-  "originalUrl": "https://example.com/?utm_source=mailchimp",
-  "cleanedUrl": "https://example.com/",
-  "platform": "web",
-  "platformHost": "example.com",
+          "shortUrl": "https://shortlinks.bhaumicsingh.tech/google_drive/aB3xQ9",
+          "originalUrl": "https://drive.google.com/file/d/example/view?usp=drive_link",
+          "cleanedUrl": "https://drive.google.com/file/d/example/view",
+          "platform": "google_drive",
+          "platformHost": "drive.google.com",
   "createdAt": "2026-01-01T00:00:00.000Z"
 }`}</pre>
 
           <h2>GET /api/v1/links/:slug</h2>
           <p>Read metadata for an existing link.</p>
+
+          <h2>GET /:platform/:slug</h2>
+          <p>
+            Follow a generated short link, for example{' '}
+            <code>/google_drive/aB3xQ9</code>. Older slug-only links continue to
+            redirect for compatibility.
+          </p>
 
           <h2>POST /api/v1/clean</h2>
           <p>

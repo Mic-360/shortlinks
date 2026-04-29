@@ -39,15 +39,19 @@ export default function McpDocsPage() {
   "mcpServers": {
     "linkshort": {
       "type": "http",
-      "url": "https://your-site/api/mcp",
-      "headers": { "x-api-key": "optional-api-key" }
+      "url": "https://shortlinks.bhaumicsingh.tech/api/mcp",
+      "headers": { "x-api-key": "optional-linkshort-api-key" }
     }
   }
 }`}</pre>
 
           <h2>Local (stdio)</h2>
           <pre>{`# Run from a clone of the repo
-LINKSHORT_API_KEY=optional bun run mcp:stdio`}</pre>
+LINKSHORT_API_KEY=optional-linkshort-api-key bun run mcp:stdio`}</pre>
+          <p>
+            <code>LINKSHORT_API_KEY</code> identifies a Linkshort client for
+            rate limiting. Do not use your Appwrite server API key here.
+          </p>
 
           <h2>Tools</h2>
           <h3>create_short_link</h3>
