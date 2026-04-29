@@ -1,68 +1,97 @@
-# Contribution Rules 📚:
+# Contributing to Link Shortener
 
-- You are allowed to make spam pull requests.
-- Do Not add any use less package.
-- Do NOT remove other content.
-- Styling/code has to be linted and pretty and it should work.
-- Write a Comment and Review on your PR.
-- Add your image to the Contributors Section.
-- Try to keep pull requests small to minimize merge conflicts
+Thanks for taking the time to contribute.
 
-## Getting Started 🤩🤗:
+This project is small and straightforward, so the best contributions are focused, well-tested, and easy to review.
 
-- Fork this repo
-- Clone on your local machine
+## Before you start
 
-```terminal
-git clone https://github.com/mic-360/link-short-hacktoberfest2022.git
+Please keep these expectations in mind:
+
+- Keep pull requests small and focused.
+- Do not add unnecessary dependencies.
+- Avoid unrelated formatting or refactoring in the same PR.
+- Make sure your changes work locally before opening a pull request.
+- Update documentation when behavior or setup changes.
+
+## Local setup
+
+1. Fork the repository.
+2. Clone your fork locally.
+3. Install dependencies.
+4. Configure the database connection in `.env`.
+5. Generate the Prisma client and sync the schema.
+
+```bash
+git clone <your-fork-url>
+cd link-shortner
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
 ```
 
-- Navigate to project directory.
+## Recommended workflow
 
-```terminal
-cd link-short-hacktoberfest2022
+Create a branch for your work:
+
+```bash
+git checkout -b feature/short-description
 ```
 
-- Create a new Branch
+Make your changes, then run the project checks:
 
-```markdown
-git checkout -b < your-new-branch >
+```bash
+npm run lint
+npm run pretty
 ```
 
-- Commit your changes.
+Commit with a clear message:
 
-```markdown
-git commit -m "Change-Related-hint: Something which makes sense"
+```bash
+git commit -m "Add slug validation to API route"
 ```
 
-- Then push
+Push your branch and open a pull request against the main repository.
 
-```markdown
-git push origin < your-new-branch >
+## Pull request checklist
+
+Before submitting a PR, please confirm that:
+
+- your change solves a specific problem
+- the code builds and runs locally
+- `npm run lint` passes
+- formatting has been applied where needed
+- any related documentation has been updated
+- the PR description explains what changed and why
+
+## Code guidelines
+
+- Prefer TypeScript-safe changes.
+- Reuse existing patterns before introducing new abstractions.
+- Preserve the current project structure unless there is a strong reason to change it.
+- Keep API behavior explicit and easy to understand.
+
+## Syncing with the main repository
+
+If your branch falls behind, add the original repository as an upstream remote and sync before continuing:
+
+```bash
+git remote add upstream <original-repo-url>
+git fetch upstream
+git merge upstream/main
 ```
 
-- Create a new pull request from your forked repository
+If the default branch for the original repository is different, replace `main` with the correct branch name.
 
-<br>
+## Good first contribution ideas
 
-## Avoid Conflicts 🥠
+- improve the homepage UI
+- add a form to create short links
+- add URL and slug validation
+- improve middleware or API error handling
+- add tests for the API route and redirect flow
 
-An easy way to avoid conflicts is to add an 'upstream' for your git repo, as other PR's may be merged while you're working on your branch/fork.
+## Questions or suggestions
 
-```terminal
-git remote add upstream https://github.com/mic-360/link-short-hacktoberfest2022
-```
-
-You can verify that the new remote has been added by typing
-
-```terminal
-git remote -v
-```
-
-To pull any new changes from your parent repo simply run
-
-```terminal
-git merge upstream/master
-```
-
-This will give you any eventual conflicts and allow you to easily solve them in your repo. It's a good idea to use it frequently in between your own commits to make sure that your repo is up to date with its parent.
+If you are planning a larger change, open an issue first or describe the proposal clearly in your pull request so maintainers can review it with the right context.
