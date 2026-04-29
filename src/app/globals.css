@@ -148,7 +148,6 @@ nav.primary {
   display: flex;
   gap: 1.4rem;
   font-size: 0.95rem;
-  color: var(--ink-soft);
 }
 nav.primary a {
   color: inherit;

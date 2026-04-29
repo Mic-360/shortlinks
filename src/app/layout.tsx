@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import './globals.css'
+import Image from 'next/image'
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 const SITE_NAME = 'Linkshort'
@@ -94,30 +95,37 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <header className="site-header">
+        <header>
           <div className="shell">
             <Link href="/" className="brand" aria-label={`${SITE_NAME} home`}>
-              <span className="brand-mark" aria-hidden="true" />
-              {SITE_NAME}
+              <Image
+                src="/logo.png"
+                alt={`${SITE_NAME} logo`}
+                width={100}
+                height={100}
+              />
             </Link>
-            <nav className="primary" aria-label="Primary">
-              <Link href="/docs/api">API</Link>
-              <Link href="/docs/mcp">MCP</Link>
-              <a href="https://github.com" rel="noreferrer">
-                GitHub
-              </a>
-            </nav>
           </div>
         </header>
         <main id="main">{children}</main>
         <footer className="site-footer">
           <div className="shell">
             <span>
-              © {new Date().getFullYear()} {SITE_NAME}. Built on Appwrite.
+              © {new Date().getFullYear()} {SITE_NAME}. Built on Appwrite by {' '}
+              <a
+                href="http://bhaumicsingh.bio"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Bhaumik Singh
+              </a>
             </span>
             <span>
               <Link href="/docs/api">API</Link> ·{' '}
-              <Link href="/docs/mcp">MCP</Link>
+              <Link href="/docs/mcp">MCP</Link> ·{' '}
+              <a href="https://github.com/Mic-360/shortlinks" rel="noreferrer">
+                GitHub
+              </a>
             </span>
           </div>
         </footer>
