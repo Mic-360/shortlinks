@@ -1,0 +1,10 @@
+{
+  "name": "cleanup-rate-limits",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/main.ts",
+  "dependencies": {
+    "node-appwrite": "^17.0.0"
+  }
+}
