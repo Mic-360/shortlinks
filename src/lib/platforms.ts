@@ -1,27 +1,32 @@
-export type Platform =
-  | 'linkedin'
-  | 'youtube'
-  | 'instagram'
-  | 'twitter'
-  | 'google_drive'
-  | 'google_docs'
-  | 'google_sheets'
-  | 'google_forms'
-  | 'google_maps'
-  | 'facebook'
-  | 'tiktok'
-  | 'reddit'
-  | 'github'
-  | 'notion'
-  | 'figma'
-  | 'amazon'
-  | 'medium'
-  | 'whatsapp'
-  | 'telegram'
-  | 'discord'
-  | 'spotify'
-  | 'pinterest'
-  | 'web'
+export const PLATFORMS = [
+  'linkedin',
+  'youtube',
+  'instagram',
+  'twitter',
+  'google_drive',
+  'google_docs',
+  'google_sheets',
+  'google_forms',
+  'google_maps',
+  'facebook',
+  'tiktok',
+  'reddit',
+  'github',
+  'notion',
+  'figma',
+  'amazon',
+  'medium',
+  'whatsapp',
+  'telegram',
+  'discord',
+  'spotify',
+  'pinterest',
+  'web',
+] as const
+
+export type Platform = (typeof PLATFORMS)[number]
+
+const PLATFORM_SET = new Set<string>(PLATFORMS)
 
 const RULES: { platform: Platform; hosts: RegExp }[] = [
   { platform: 'linkedin', hosts: /(^|\.)linkedin\.com$|(^|\.)lnkd\.in$/i },
@@ -54,6 +59,18 @@ export function detectPlatform(host: string): Platform {
     if (r.hosts.test(h)) return r.platform
   }
   return 'web'
+}
+
+export function isPlatform(input: string): input is Platform {
+  return PLATFORM_SET.has(input)
+}
+
+export function platformPathSegment(platform: string): Platform {
+  return isPlatform(platform) ? platform : 'web'
+}
+
+export function isPlatformPathSegment(input: string): input is Platform {
+  return isPlatform(input)
 }
 
 const LABELS: Record<Platform, string> = {
