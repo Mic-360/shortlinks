@@ -36,7 +36,7 @@ export function buildMcpServer(ctx: McpContext): McpServer {
       if (!limit.ok) return err('Rate limit exceeded. Try again in a moment.')
       const result = await createShortLink(url, ctx.identity)
       if (!result.ok) return err(result.error)
-      const shortUrl = `${ctx.publicBaseUrl.replace(/\/$/, '')}/${result.row.slug}`
+      const shortUrl = `${ctx.publicBaseUrl.replace(/\/$/, '')}/${platformPathSegment(result.row.platform)}/${result.row.slug}`
       return ok(
         JSON.stringify({
           slug: result.row.slug,

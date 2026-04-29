@@ -1,5 +1,6 @@
 import 'server-only'
 import { anonymousIdentity, apiKeyIdentity, extractApiKey, type Identity } from './identity'
+import { platformPathSegment } from './platforms'
 import { checkRateLimit, rateLimitHeaders, type RateLimitResult } from './rate-limit'
 
 export function publicSiteUrl(): string {
@@ -8,9 +9,20 @@ export function publicSiteUrl(): string {
   return ''
 }
 
-export function buildShortUrl(slug: string, requestUrl: URL): string {
-  const base = publicSiteUrl() || `${requestUrl.protocol}//${requestUrl.host}`
-  return `${base}/${slug}`
+function forwardedOrigin(headers: Headers): string {
+  const host = headers.get('x-forwarded-host') ?? headers.get('host')
+  if (!host) return ''
+  const proto = headers.get('x-forwarded-proto') ?? 'https'
+  return `${proto.split(',')[0]?.trim() || 'https'}://${host.split(',')[0]?.trim()}`
+}
+
+export function requestOrigin(requestUrl: URL, headers?: Headers): string {
+  return publicSiteUrl() || (headers ? forwardedOrigin(headers) : '') || requestUrl.origin
+}
+
+export function buildShortUrl(slug: string, platform: string, requestUrl: URL, headers?: Headers): string {
+  const base = requestOrigin(requestUrl, headers)
+  return `${base}/${platformPathSegment(platform)}/${slug}`
 }
 
 export function resolveIdentity(headers: Headers): Identity {

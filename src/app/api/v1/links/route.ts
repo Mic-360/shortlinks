@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   return jsonResponse(
     {
       slug: result.row.slug,
-      shortUrl: buildShortUrl(result.row.slug, url),
+      shortUrl: buildShortUrl(result.row.slug, result.row.platform, url, req.headers),
       originalUrl: result.row.originalUrl,
       cleanedUrl: result.row.cleanedUrl,
       platform: result.row.platform,

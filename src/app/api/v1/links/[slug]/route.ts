@@ -15,7 +15,7 @@ export async function GET(
   const url = new URL(req.url)
   return jsonResponse({
     slug: result.row.slug,
-    shortUrl: buildShortUrl(result.row.slug, url),
+    shortUrl: buildShortUrl(result.row.slug, result.row.platform, url, req.headers),
     cleanedUrl: result.row.cleanedUrl,
     originalUrl: result.row.originalUrl,
     platform: result.row.platform,
