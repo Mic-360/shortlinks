@@ -324,6 +324,18 @@ footer.site-footer .shell {
   gap: 0.4rem 1rem;
   font-size: 0.92rem;
 }
+@media (max-width: 480px) {
+  .result .kv {
+    grid-template-columns: 1fr;
+    gap: 0.1rem 0;
+  }
+  .result .kv dt {
+    margin-top: 0.5rem;
+  }
+  .result .kv dt:first-child {
+    margin-top: 0;
+  }
+}
 .result .kv dt {
   color: var(--ink-soft);
   font-family: var(--sans);
@@ -334,15 +346,31 @@ footer.site-footer .shell {
   word-break: break-all;
 }
 .result .short-url {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   background: var(--paper-2);
   padding: 0.6rem 0.8rem;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   margin-bottom: 0.75rem;
   font-family: var(--mono);
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+.result .short-url a {
+  min-width: 0;
+}
+@media (max-width: 480px) {
+  .result .short-url {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .result .short-url .copy-btn {
+    width: 100%;
+    text-align: center;
+  }
 }
 .result.error {
   border-color: var(--danger);
