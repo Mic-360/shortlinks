@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ slug: string }> },
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
   const result = await getShortLink(slug)
@@ -15,7 +15,12 @@ export async function GET(
   const url = new URL(req.url)
   return jsonResponse({
     slug: result.row.slug,
-    shortUrl: buildShortUrl(result.row.slug, result.row.platform, url, req.headers),
+    shortUrl: buildShortUrl(
+      result.row.slug,
+      result.row.platform,
+      url,
+      req.headers
+    ),
     cleanedUrl: result.row.cleanedUrl,
     originalUrl: result.row.originalUrl,
     platform: result.row.platform,

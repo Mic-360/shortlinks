@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   if (!result.ok) {
     return jsonResponse(
       { error: result.error },
-      { status: result.status, headers: rateLimitHeaders(limit.result) },
+      { status: result.status, headers: rateLimitHeaders(limit.result) }
     )
   }
 
@@ -42,13 +42,18 @@ export async function POST(req: Request) {
   return jsonResponse(
     {
       slug: result.row.slug,
-      shortUrl: buildShortUrl(result.row.slug, result.row.platform, url, req.headers),
+      shortUrl: buildShortUrl(
+        result.row.slug,
+        result.row.platform,
+        url,
+        req.headers
+      ),
       originalUrl: result.row.originalUrl,
       cleanedUrl: result.row.cleanedUrl,
       platform: result.row.platform,
       platformHost: result.row.platformHost,
       createdAt: result.row.$createdAt,
     },
-    { status: 201, headers: rateLimitHeaders(limit.result) },
+    { status: 201, headers: rateLimitHeaders(limit.result) }
   )
 }

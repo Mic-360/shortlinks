@@ -1,7 +1,16 @@
 import 'server-only'
-import { anonymousIdentity, apiKeyIdentity, extractApiKey, type Identity } from './identity'
+import {
+  anonymousIdentity,
+  apiKeyIdentity,
+  extractApiKey,
+  type Identity,
+} from './identity'
 import { platformPathSegment } from './platforms'
-import { checkRateLimit, rateLimitHeaders, type RateLimitResult } from './rate-limit'
+import {
+  checkRateLimit,
+  rateLimitHeaders,
+  type RateLimitResult,
+} from './rate-limit'
 
 export function publicSiteUrl(): string {
   const fromEnv = process.env.NEXT_PUBLIC_SITE_URL
@@ -17,10 +26,19 @@ function forwardedOrigin(headers: Headers): string {
 }
 
 export function requestOrigin(requestUrl: URL, headers?: Headers): string {
-  return publicSiteUrl() || (headers ? forwardedOrigin(headers) : '') || requestUrl.origin
+  return (
+    publicSiteUrl() ||
+    (headers ? forwardedOrigin(headers) : '') ||
+    requestUrl.origin
+  )
 }
 
-export function buildShortUrl(slug: string, platform: string, requestUrl: URL, headers?: Headers): string {
+export function buildShortUrl(
+  slug: string,
+  platform: string,
+  requestUrl: URL,
+  headers?: Headers
+): string {
   const base = requestOrigin(requestUrl, headers)
   return `${base}/${platformPathSegment(platform)}/${slug}`
 }
@@ -35,7 +53,9 @@ export type RateLimited =
   | { ok: true; identity: Identity; result: RateLimitResult }
   | { ok: false; response: Response }
 
-export async function enforceCreateLimit(headers: Headers): Promise<RateLimited> {
+export async function enforceCreateLimit(
+  headers: Headers
+): Promise<RateLimited> {
   const identity = resolveIdentity(headers)
   const result = await checkRateLimit(identity)
   if (result.ok) return { ok: true, identity, result }
@@ -48,14 +68,15 @@ export async function enforceCreateLimit(headers: Headers): Promise<RateLimited>
     ok: false,
     response: new Response(
       JSON.stringify({ error: 'Rate limit exceeded. Try again in a moment.' }),
-      { status: 429, headers: headersObj },
+      { status: 429, headers: headersObj }
     ),
   }
 }
 
 export function jsonResponse(body: unknown, init?: ResponseInit): Response {
   const headers = new Headers(init?.headers)
-  if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+  if (!headers.has('Content-Type'))
+    headers.set('Content-Type', 'application/json')
   return new Response(JSON.stringify(body), { ...init, headers })
 }
 

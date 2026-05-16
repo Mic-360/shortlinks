@@ -111,7 +111,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <footer className="site-footer">
           <div className="shell">
             <span>
-              © {new Date().getFullYear()} {SITE_NAME}. Built on Appwrite by {' '}
+              © {new Date().getFullYear()} {SITE_NAME}. Built on Appwrite by{' '}
               <a
                 href="http://bhaumicsingh.bio"
                 target="_blank"

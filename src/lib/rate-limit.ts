@@ -16,7 +16,11 @@ export type RateLimitResult = {
   reset: number
 }
 
-function rowId(scope: string, identityHash: string, windowStart: number): string {
+function rowId(
+  scope: string,
+  identityHash: string,
+  windowStart: number
+): string {
   return createHash('sha256')
     .update(`${scope}:${identityHash}:${windowStart}`)
     .digest('hex')
@@ -40,7 +44,9 @@ function isLimitExceeded(err: unknown): boolean {
   return false
 }
 
-export async function checkRateLimit(identity: Identity): Promise<RateLimitResult> {
+export async function checkRateLimit(
+  identity: Identity
+): Promise<RateLimitResult> {
   const db = getDatabases()
   const now = Date.now()
   const windowStart = Math.floor(now / 1000)
@@ -68,7 +74,7 @@ export async function checkRateLimit(identity: Identity): Promise<RateLimitResul
       id,
       'count',
       1,
-      LIMIT,
+      LIMIT
     )
     const count = (updated as unknown as { count: number }).count
     return {

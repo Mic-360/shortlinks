@@ -20,7 +20,11 @@ export function ipFromHeaders(headers: Headers): string {
 }
 
 export function anonymousIdentity(headers: Headers): Identity {
-  return { hash: sha256(`ip:${ipFromHeaders(headers)}`), type: 'anonymous', prefix: null }
+  return {
+    hash: sha256(`ip:${ipFromHeaders(headers)}`),
+    type: 'anonymous',
+    prefix: null,
+  }
 }
 
 export function apiKeyIdentity(rawKey: string): Identity {

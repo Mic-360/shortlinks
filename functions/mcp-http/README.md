@@ -15,7 +15,16 @@ pipeline yet; ship it only if the Sites route hits a hard limitation.
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { buildMcpServer, identityForApiKeyOrAnon } from '../../src/mcp/server'
 
-export default async ({ req }: { req: { url: string; headers: Record<string, string>; bodyRaw: string; method: string } }) => {
+export default async ({
+  req,
+}: {
+  req: {
+    url: string
+    headers: Record<string, string>
+    bodyRaw: string
+    method: string
+  }
+}) => {
   const headers = new Headers(req.headers)
   const request = new Request(req.url, {
     method: req.method,
@@ -27,7 +36,9 @@ export default async ({ req }: { req: { url: string; headers: Record<string, str
     identity,
     publicBaseUrl: process.env.NEXT_PUBLIC_SITE_URL ?? '',
   })
-  const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+  })
   await server.connect(transport)
   return transport.handleRequest(request)
 }

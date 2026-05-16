@@ -13,7 +13,7 @@ describe('cleanUrl', () => {
 
   it('strips utm_* and friends', () => {
     const r = cleanUrl(
-      'https://example.com/?utm_source=x&utm_medium=y&fbclid=abc&keep=me',
+      'https://example.com/?utm_source=x&utm_medium=y&fbclid=abc&keep=me'
     )
     expect(r.ok).toBe(true)
     if (r.ok) {
@@ -23,7 +23,7 @@ describe('cleanUrl', () => {
 
   it('preserves YouTube v and list params', () => {
     const r = cleanUrl(
-      'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&utm_source=share',
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&utm_source=share'
     )
     expect(r.ok).toBe(true)
     if (r.ok) {
@@ -35,7 +35,7 @@ describe('cleanUrl', () => {
 
   it('preserves Google Drive file IDs', () => {
     const r = cleanUrl(
-      'https://drive.google.com/file/d/abc123/view?usp=sharing&utm_campaign=x',
+      'https://drive.google.com/file/d/abc123/view?usp=sharing&utm_campaign=x'
     )
     expect(r.ok).toBe(true)
     if (r.ok) {

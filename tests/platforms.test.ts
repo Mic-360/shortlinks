@@ -1,4 +1,8 @@
-import { detectPlatform, isPlatformPathSegment, platformPathSegment } from '@/lib/platforms'
+import {
+  detectPlatform,
+  isPlatformPathSegment,
+  platformPathSegment,
+} from '@/lib/platforms'
 import { describe, expect, it } from 'vitest'
 
 describe('detectPlatform', () => {

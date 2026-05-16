@@ -1,4 +1,8 @@
-import { anonymousIdentity, apiKeyIdentity, type Identity } from '@/lib/identity'
+import {
+  anonymousIdentity,
+  apiKeyIdentity,
+  type Identity,
+} from '@/lib/identity'
 import { createShortLink, getShortLink } from '@/lib/link-service'
 import { detectPlatform, platformPathSegment } from '@/lib/platforms'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -43,9 +47,9 @@ export function buildMcpServer(ctx: McpContext): McpServer {
           shortUrl,
           cleanedUrl: result.row.cleanedUrl,
           platform: result.row.platform,
-        }),
+        })
       )
-    },
+    }
   )
 
   server.registerTool(
@@ -64,9 +68,9 @@ export function buildMcpServer(ctx: McpContext): McpServer {
           cleanedUrl: cleaned.cleanedUrl,
           host: cleaned.host,
           platform: detectPlatform(cleaned.host),
-        }),
+        })
       )
-    },
+    }
   )
 
   server.registerTool(
@@ -86,15 +90,18 @@ export function buildMcpServer(ctx: McpContext): McpServer {
           platform: result.row.platform,
           clickCount: result.row.clickCount,
           createdAt: result.row.$createdAt,
-        }),
+        })
       )
-    },
+    }
   )
 
   return server
 }
 
-export function identityForApiKeyOrAnon(rawKey: string | null, headers: Headers): Identity {
+export function identityForApiKeyOrAnon(
+  rawKey: string | null,
+  headers: Headers
+): Identity {
   if (rawKey) return apiKeyIdentity(rawKey)
   return anonymousIdentity(headers)
 }

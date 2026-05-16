@@ -1,6 +1,7 @@
 import type { Models } from 'node-appwrite'
 
-export const APPWRITE_DATABASE_ID = process.env.APPWRITE_DATABASE_ID ?? 'linkshort'
+export const APPWRITE_DATABASE_ID =
+  process.env.APPWRITE_DATABASE_ID ?? 'linkshort'
 
 export const TABLE_SHORT_LINKS =
   process.env.APPWRITE_SHORT_LINKS_TABLE_ID ?? 'short_links'

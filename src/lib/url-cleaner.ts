@@ -1,4 +1,12 @@
-const TRACKING_PARAM_PREFIXES = ['utm_', 'mc_', 'pk_', 'hsa_', '_hs', 'oly_', 'vero_']
+const TRACKING_PARAM_PREFIXES = [
+  'utm_',
+  'mc_',
+  'pk_',
+  'hsa_',
+  '_hs',
+  'oly_',
+  'vero_',
+]
 
 const TRACKING_PARAM_EXACT = new Set([
   'fbclid',
@@ -34,15 +42,17 @@ const TRACKING_PARAM_EXACT = new Set([
   'sc_medium',
 ])
 
-export type CleanResult = {
-  ok: true
-  originalUrl: string
-  cleanedUrl: string
-  host: string
-} | {
-  ok: false
-  error: string
-}
+export type CleanResult =
+  | {
+      ok: true
+      originalUrl: string
+      cleanedUrl: string
+      host: string
+    }
+  | {
+      ok: false
+      error: string
+    }
 
 function isTracking(name: string): boolean {
   const lower = name.toLowerCase()
@@ -51,7 +61,8 @@ function isTracking(name: string): boolean {
 }
 
 export function cleanUrl(input: string): CleanResult {
-  if (typeof input !== 'string') return { ok: false, error: 'URL must be a string' }
+  if (typeof input !== 'string')
+    return { ok: false, error: 'URL must be a string' }
   const trimmed = input.trim()
   if (trimmed.length === 0) return { ok: false, error: 'URL is required' }
   if (trimmed.length > 2048) return { ok: false, error: 'URL too long' }

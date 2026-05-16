@@ -1,7 +1,11 @@
 import 'server-only'
 import { AppwriteException } from 'node-appwrite'
 import { getDatabases } from './appwrite/server'
-import { APPWRITE_DATABASE_ID, TABLE_SHORT_LINKS, type ShortLinkRow } from './appwrite/tables'
+import {
+  APPWRITE_DATABASE_ID,
+  TABLE_SHORT_LINKS,
+  type ShortLinkRow,
+} from './appwrite/tables'
 import type { Identity } from './identity'
 import { detectPlatform, type Platform } from './platforms'
 import { generateSlug, isReserved, isValidSlug, SLUG_LENGTH } from './slug'
@@ -33,7 +37,7 @@ function isNotFound(err: unknown): boolean {
 
 export async function createShortLink(
   rawUrl: string,
-  identity: Identity,
+  identity: Identity
 ): Promise<CreateLinkResult> {
   const cleaned = cleanUrl(rawUrl)
   if (!cleaned.ok) return { ok: false, status: 400, error: cleaned.error }
@@ -61,7 +65,7 @@ export async function createShortLink(
           clickCount: 0,
           active: true,
           expiresAt: null,
-        },
+        }
       )
       return { ok: true, row: created }
     } catch (err) {
@@ -85,7 +89,7 @@ export async function getShortLink(slug: string): Promise<GetLinkResult> {
     const row = await db.getDocument<ShortLinkRow>(
       APPWRITE_DATABASE_ID,
       TABLE_SHORT_LINKS,
-      slug,
+      slug
     )
     if (!row.active) return { ok: false, status: 404, error: 'Not found' }
     if (row.expiresAt && new Date(row.expiresAt).getTime() < Date.now()) {
@@ -107,7 +111,7 @@ export async function recordClick(slug: string): Promise<void> {
       TABLE_SHORT_LINKS,
       slug,
       'clickCount',
-      1,
+      1
     )
   } catch {
     // best effort; never block the redirect

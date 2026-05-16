@@ -36,8 +36,14 @@ const RULES: { platform: Platform; hosts: RegExp }[] = [
   { platform: 'google_drive', hosts: /(^|\.)drive\.google\.com$/i },
   { platform: 'google_docs', hosts: /(^|\.)docs\.google\.com$/i },
   { platform: 'google_sheets', hosts: /(^|\.)sheets\.google\.com$/i },
-  { platform: 'google_forms', hosts: /(^|\.)forms\.google\.com$|(^|\.)forms\.gle$/i },
-  { platform: 'google_maps', hosts: /(^|\.)(maps\.google\.com|goo\.gl|maps\.app\.goo\.gl)$/i },
+  {
+    platform: 'google_forms',
+    hosts: /(^|\.)forms\.google\.com$|(^|\.)forms\.gle$/i,
+  },
+  {
+    platform: 'google_maps',
+    hosts: /(^|\.)(maps\.google\.com|goo\.gl|maps\.app\.goo\.gl)$/i,
+  },
   { platform: 'facebook', hosts: /(^|\.)(facebook\.com|fb\.me|fb\.watch)$/i },
   { platform: 'tiktok', hosts: /(^|\.)(tiktok\.com|vm\.tiktok\.com)$/i },
   { platform: 'reddit', hosts: /(^|\.)(reddit\.com|redd\.it)$/i },

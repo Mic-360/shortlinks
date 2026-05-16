@@ -24,7 +24,9 @@ describe('identity', () => {
   })
 
   it('extracts bearer api keys', () => {
-    expect(extractApiKey(new Headers({ authorization: 'Bearer abc123' }))).toBe('abc123')
+    expect(extractApiKey(new Headers({ authorization: 'Bearer abc123' }))).toBe(
+      'abc123'
+    )
     expect(extractApiKey(new Headers({ 'x-api-key': 'xyz789' }))).toBe('xyz789')
     expect(extractApiKey(new Headers())).toBeNull()
   })

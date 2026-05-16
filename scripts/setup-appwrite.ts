@@ -30,37 +30,63 @@ async function ignoreConflict<T>(p: Promise<T>): Promise<T | null> {
 }
 
 async function ensureDatabase() {
-  await ignoreConflict(
-    db.create(APPWRITE_DATABASE_ID, 'linkshort'),
-  )
+  await ignoreConflict(db.create(APPWRITE_DATABASE_ID, 'linkshort'))
 }
 
 async function ensureCollection(id: string, name: string) {
   await ignoreConflict(
-    db.createCollection(APPWRITE_DATABASE_ID, id, name, undefined, false, true),
+    db.createCollection(APPWRITE_DATABASE_ID, id, name, undefined, false, true)
   )
 }
 
-async function str(id: string, key: string, size: number, required: boolean, def?: string) {
+async function str(
+  id: string,
+  key: string,
+  size: number,
+  required: boolean,
+  def?: string
+) {
   const safeDef = required ? undefined : def
   await ignoreConflict(
-    db.createStringAttribute(APPWRITE_DATABASE_ID, id, key, size, required, safeDef),
+    db.createStringAttribute(
+      APPWRITE_DATABASE_ID,
+      id,
+      key,
+      size,
+      required,
+      safeDef
+    )
   )
 }
 async function int(id: string, key: string, required: boolean, def?: number) {
   const safeDef = required ? undefined : def
   await ignoreConflict(
-    db.createIntegerAttribute(APPWRITE_DATABASE_ID, id, key, required, undefined, undefined, safeDef),
+    db.createIntegerAttribute(
+      APPWRITE_DATABASE_ID,
+      id,
+      key,
+      required,
+      undefined,
+      undefined,
+      safeDef
+    )
   )
 }
 async function bool(id: string, key: string, required: boolean, def?: boolean) {
   const safeDef = required ? undefined : def
   await ignoreConflict(
-    db.createBooleanAttribute(APPWRITE_DATABASE_ID, id, key, required, safeDef),
+    db.createBooleanAttribute(APPWRITE_DATABASE_ID, id, key, required, safeDef)
   )
 }
-async function index(id: string, key: string, type: IndexType, attrs: string[]) {
-  await ignoreConflict(db.createIndex(APPWRITE_DATABASE_ID, id, key, type, attrs))
+async function index(
+  id: string,
+  key: string,
+  type: IndexType,
+  attrs: string[]
+) {
+  await ignoreConflict(
+    db.createIndex(APPWRITE_DATABASE_ID, id, key, type, attrs)
+  )
 }
 
 async function ensureShortLinks() {
@@ -76,7 +102,9 @@ async function ensureShortLinks() {
   await bool(TABLE_SHORT_LINKS, 'active', true, true)
   await str(TABLE_SHORT_LINKS, 'expiresAt', 32, false)
   await index(TABLE_SHORT_LINKS, 'idx_platform', IndexType.Key, ['platform'])
-  await index(TABLE_SHORT_LINKS, 'idx_platform_host', IndexType.Key, ['platformHost'])
+  await index(TABLE_SHORT_LINKS, 'idx_platform_host', IndexType.Key, [
+    'platformHost',
+  ])
   await index(TABLE_SHORT_LINKS, 'idx_active', IndexType.Key, ['active'])
 }
 
@@ -98,9 +126,13 @@ async function ensureRateLimits() {
   await int(TABLE_RATE_LIMITS, 'windowStart', true, 0)
   await int(TABLE_RATE_LIMITS, 'count', true, 0)
   await str(TABLE_RATE_LIMITS, 'expiresAt', 32, true)
-  await index(TABLE_RATE_LIMITS, 'idx_identity_hash', IndexType.Key, ['identityHash'])
+  await index(TABLE_RATE_LIMITS, 'idx_identity_hash', IndexType.Key, [
+    'identityHash',
+  ])
   await index(TABLE_RATE_LIMITS, 'idx_scope', IndexType.Key, ['scope'])
-  await index(TABLE_RATE_LIMITS, 'idx_window_start', IndexType.Key, ['windowStart'])
+  await index(TABLE_RATE_LIMITS, 'idx_window_start', IndexType.Key, [
+    'windowStart',
+  ])
   await index(TABLE_RATE_LIMITS, 'idx_expires_at', IndexType.Key, ['expiresAt'])
 }
 
